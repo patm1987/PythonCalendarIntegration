@@ -215,3 +215,4 @@ pip-log.txt
 .mr.developer.cfg
 client_secrets.json
 calendar.dat
+.idea

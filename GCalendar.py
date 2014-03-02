@@ -1,4 +1,3 @@
-
 from oauth2client import file
 from oauth2client import client
 from oauth2client import tools
@@ -8,6 +7,7 @@ import argparse
 import httplib2
 
 __author__ = 'Patrick'
+
 
 class GCalendar:
     def authorize(self, credentials):
@@ -43,14 +43,29 @@ class GCalendar:
         while True:
             calendar_list = self._service.calendarList().list(pageToken=page_token).execute()
             for calendar_list_entry in calendar_list['items']:
-                ret.append(CalendarData(calendar_list_entry))
+                ret.append(CalendarData(calendar_list_entry, self._service))
             page_token = calendar_list.get('nextPageToken')
             if not page_token:
                 break
         return ret
 
+
 class CalendarData:
-    def __init__(self, calendar_entry):
+    def __init__(self, calendar_entry, service):
         self.id = calendar_entry['id']
         self.selected = calendar_entry['selected']
         self.summary = calendar_entry['summary']
+        self._service = service
+        self.events = list()
+
+        self.refresh_events()
+
+    def refresh_events(self):
+        page_token = None
+        self.events = list()
+        while True:
+            events = self._service.events().list(calendarId=self.id, pageToken=page_token).execute()
+            self.events.append(events)
+            page_token = events.get('nextPageToken')
+            if not page_token:
+                break

@@ -31,6 +31,9 @@ def draw_with_calendar_list(screen, calendar_list):
 
 
 if __name__ == '__main__':
+
+    # we're going to want to delay starting curses until after we auth!
+    # move to after teh ctor for GCalendar
     start_curses()
     calendar = GCalendar('client_secrets.json', sys.argv)
     stdscr.nodelay(1)

@@ -5,10 +5,12 @@ from apiclient import discovery
 import os
 import argparse
 import httplib2
+import dateutil.parser
 
 __author__ = 'Patrick'
 
 
+# manages a google calendar account, has a list of calendars with a list of events
 class GCalendar:
     def authorize(self, credentials):
         http = httplib2.Http()
@@ -37,6 +39,8 @@ class GCalendar:
 
         self.authorize(credentials)
 
+    # @brief    retrieves the list of calendars from google
+    # @return   a list of CalendarData representing all of the current user's calendars
     def get_calendar_list(self):
         ret = list()
         page_token = None
@@ -50,6 +54,7 @@ class GCalendar:
         return ret
 
 
+# defines the data from a calendar
 class CalendarData:
     def __init__(self, calendar_entry, service):
         self.id = calendar_entry['id']
@@ -65,7 +70,28 @@ class CalendarData:
         self.events = list()
         while True:
             events = self._service.events().list(calendarId=self.id, pageToken=page_token).execute()
-            self.events.append(events)
+            for event in events['items']:
+                self.events.append(CalendarEvent(event))
             page_token = events.get('nextPageToken')
             if not page_token:
                 break
+
+
+# defines a calendar event
+class CalendarEvent:
+    def __init__(self, event_entry):
+        self.summary = event_entry.get('summary', '')
+        self.description = event_entry.get('description', '')
+        start_entry = event_entry['start']
+        if start_entry.get('date'):
+            self.start = dateutil.parser.parse(start_entry['date'])
+        elif start_entry.get('dateTime'):
+            self.start = dateutil.parser.parse(start_entry['dateTime'])
+            #todo: I also need to parse timezone offsets
+
+        end_entry = event_entry['end']
+        if end_entry.get('date'):
+            self.end = dateutil.parser.parse(end_entry['date'])
+        elif end_entry.get('dateTime'):
+            self.end = dateutil.parser.parse(end_entry['dateTime'])
+            #todo: I also need to parse the timezone offsets

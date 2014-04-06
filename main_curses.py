@@ -26,7 +26,7 @@ def draw_with_calendar_list(screen, calendar_list):
         screen.addstr(y, 0, calendar_data.summary)
         y += 1
         for event in calendar_data.events:
-            screen.addstr(y, 1, event['summary'])
+            screen.addstr(y, 1, event.summary)
     screen.refresh()
 
 

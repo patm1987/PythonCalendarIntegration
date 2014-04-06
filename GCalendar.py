@@ -6,6 +6,8 @@ import os
 import argparse
 import httplib2
 import dateutil.parser
+from datetime import date
+from datetime import timedelta
 
 __author__ = 'Patrick'
 
@@ -54,7 +56,11 @@ class GCalendar:
         return ret
 
 
-# defines the data from a calendar
+# converts a datetime to RFC 3339 format (for google)
+def time_to_rfc3339(time):
+    return time.strftime('%Y-%m-%dT%H:%M:%S-00:00')
+
+
 class CalendarData:
     def __init__(self, calendar_entry, service):
         self.id = calendar_entry['id']
@@ -68,8 +74,18 @@ class CalendarData:
     def refresh_events(self):
         page_token = None
         self.events = list()
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+
         while True:
-            events = self._service.events().list(calendarId=self.id, pageToken=page_token).execute()
+            events = self._service.events().list(
+                calendarId=self.id,
+                pageToken=page_token,
+                orderBy='startTime',
+                singleEvents=True,
+                timeMin=time_to_rfc3339(today),
+                timeMax=time_to_rfc3339(tomorrow)
+            ).execute()
             for event in events['items']:
                 self.events.append(CalendarEvent(event))
             page_token = events.get('nextPageToken')

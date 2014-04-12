@@ -6,7 +6,7 @@ import os
 import argparse
 import httplib2
 import dateutil.parser
-from datetime import date
+from datetime import datetime
 from datetime import timedelta
 
 __author__ = 'Patrick'
@@ -74,7 +74,7 @@ class CalendarData:
     def refresh_events(self):
         page_token = None
         self.events = list()
-        today = date.today()
+        today = datetime.now()
         tomorrow = today + timedelta(days=1)
 
         while True:

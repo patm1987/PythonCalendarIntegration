@@ -4,6 +4,7 @@ import sys
 import curses
 import locale
 import time
+import httplib
 
 from GCalendar import *
 
@@ -55,7 +56,10 @@ if __name__ == '__main__':
     stdscr.nodelay(1)
 
     while 1:
-        render_screen()
-        time.sleep(sleepTime * 60)
+        try:
+            render_screen()
+            time.sleep(sleepTime * 60)
+        except httplib.BadStatusLine:
+            continue
 
     end_curses()

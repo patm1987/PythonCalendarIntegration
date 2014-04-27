@@ -37,7 +37,7 @@ def draw_with_calendar_list(screen, calendar_list):
         screen.addstr(y, 0, calendar_data.summary, curses.A_BOLD)
         y += 1
         for event in calendar_data.events:
-            screen.addstr(y, 1, str(event.start))
+            screen.addstr(y, 1, event.start.strftime('%a - %X'))
             screen.addstr(y, 24, event.summary.encode(code))
             y += 1
     return y

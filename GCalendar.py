@@ -6,6 +6,7 @@ import os
 import argparse
 import httplib2
 import dateutil.parser
+from dateutil import tz
 from datetime import datetime
 from datetime import timedelta
 
@@ -74,7 +75,7 @@ class CalendarData:
     def refresh_events(self):
         page_token = None
         self.events = list()
-        today = datetime.now()
+        today = datetime.utcnow()
         tomorrow = today + timedelta(days=1)
 
         while True:
@@ -96,18 +97,17 @@ class CalendarData:
 # defines a calendar event
 class CalendarEvent:
     def __init__(self, event_entry):
+        my_zone = tz.tzlocal()
         self.summary = event_entry.get('summary', '')
         self.description = event_entry.get('description', '')
         start_entry = event_entry['start']
         if start_entry.get('date'):
             self.start = dateutil.parser.parse(start_entry['date'])
         elif start_entry.get('dateTime'):
-            self.start = dateutil.parser.parse(start_entry['dateTime'])
-            #todo: I also need to parse timezone offsets
+            self.start = dateutil.parser.parse(start_entry['dateTime']).astimezone(my_zone)
 
         end_entry = event_entry['end']
         if end_entry.get('date'):
             self.end = dateutil.parser.parse(end_entry['date'])
         elif end_entry.get('dateTime'):
-            self.end = dateutil.parser.parse(end_entry['dateTime'])
-            #todo: I also need to parse the timezone offsets
+            self.end = dateutil.parser.parse(end_entry['dateTime']).astimezone(my_zone)
